@@ -20,7 +20,7 @@ import tkinter.messagebox
 
 #算法Apriori
 class Apriori(object):
-  def __init__(self,itemSets,savePath,minSupport=0.5,minConf=0.7):
+  def __init__(self,itemSets,savePath,minSupport=0.04,minConf=0.7):
     self.itemSets=itemSets
     self.minSupport=minSupport
     self.minConf =minConf
@@ -123,21 +123,32 @@ class MY_GUI():
     self.init_window_tk.title("Apriori")
     self.center_window(self.init_window_tk,400,240)
     
-    labelframe = LabelFrame(width=600, height=500,text="配置")
-    labelframe.grid(column=4, row=5, padx=20, pady=20)
+    labelframe = LabelFrame(text="配置")
+    labelframe.grid(column=4, row=8, padx=20, pady=20)
     
     self.label = Label(labelframe,text="选择Excel：").grid(column=0,row=1)
     self.path = Entry(labelframe,width=30,textvariable = self.get_value).grid(column=1,row=1)
-    self.file = Button(labelframe,text="浏览",command=self.add_mm_file,width=6).grid(column=2,row=1)
+    self.file = Button(labelframe,text="浏览",command=self.add_mm_file,width=6).grid(column=2,row=1,pady=5,padx=2)
         
-    self.wifi_text = Label(labelframe,text="最小支持度：").grid(column=0,row=2)
-    self.wifi_input = Entry(labelframe,width=30,textvariable = self.get_support_value).grid(column=1,row=2)
+    self.min_support_text = Label(labelframe,text="最小支持度：").grid(column=0,row=2)
+    self.min_support_input = Entry(labelframe,width=30,textvariable = self.get_support_value)
+    self.min_support_input.bind("<KeyRelease>",lambda event:self.validateText('get_support_value'))
+    self.min_support_input.grid(column=1,row=2,pady=5)
     
-    self.wifi_mm_text = Label(labelframe,text="最小自信度：").grid(column=0,row=3)
-    self.wifi_mm_input = Entry(labelframe,width=30,textvariable = self.get_confidence_value).grid(column=1,row=3,sticky=W)
+    self.min_conf_text = Label(labelframe,text="最小自信度：").grid(column=0,row=3)
+    self.min_conf_input = Entry(labelframe,width=30,textvariable = self.get_confidence_value)
+    self.min_conf_input.bind("<KeyRelease>",lambda event:self.validateText('get_confidence_value'))
+    self.min_conf_input.grid(column=1,row=3,pady=5)
 
-    self.submit = Button(labelframe,text="开始分析",command=self.startAnalysis,width=40).grid(column=0,row=4,columnspan=3)
+    self.submit = Button(labelframe,text="开始分析",command=self.startAnalysis,width=40).grid(column=0,row=4,columnspan=3,ipady=5,pady=10)
   
+  #校验数据
+  def validateText(self,attr):
+    try:
+      float(self.__dict__[attr].get())#获取e1的值，转为浮点数，如果不能转捕获异常
+    except:
+      messagebox.showwarning('格式错误','请输入数字')
+
   #窗口居中
   def center_window(self,root, width, height):
     screenwidth = root.winfo_screenwidth()
@@ -156,10 +167,15 @@ class MY_GUI():
     excalPath = self.get_value.get()
     minSupport = self.get_support_value.get()
     minConf = self.get_confidence_value.get()
+    if(len(excalPath)==0 or len(minSupport)==0 or len(minConf)==0):
+      messagebox.showwarning('提示','请输入完整信息')
+      return
+    
 
+    print(minSupport,minConf)
     pathList = excalPath.split('/')
     saveList = pathList[0:len(pathList)-1]
-    savePath = '/'.join(saveList)+'/result.xlsx'
+    savePath = '/'.join(saveList)+'/result.xlsx' #存储路径
 
     data = pd.read_excel(r''+excalPath, index=False)
     data = data.drop_duplicates()
@@ -170,7 +186,9 @@ class MY_GUI():
       if(len(group))>=2:
         itemSets.append(group['商品编码'].tolist())
 
-    ap = Apriori(itemSets,savePath,minSupport=0.03, minConf=0.5)
+    ap = Apriori(itemSets,savePath,minSupport=float(minSupport), minConf=float(minConf))
+
+
 
 
 #开始GUI
@@ -180,6 +198,7 @@ def gui_start():
   popup.set_init_window()
   init_window.mainloop()
 
+#入口启动
 if __name__ == '__main__':
   '''GUI输入界面'''
   gui_start()
