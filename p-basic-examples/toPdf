@@ -1,0 +1,59 @@
+# -*- encoding: utf-8 -*-
+import  os
+from win32com import client
+from PyPDF2 import PdfFileReader, PdfFileWriter
+
+def doc2pdf(doc_name, pdf_name):
+    """
+    :word文件转pdf
+    :param doc_name word文件名称
+    :param pdf_name 转换后pdf文件名称
+    """
+    doc_path = os.path.join(start_path,doc_name)
+    pdf_path = os.path.join(end_path',pdf_name)
+    try:
+        word = client.DispatchEx("Word.Application")
+        if not os.path.exists(pdf_path):
+            #os.remove(pdf_path)
+            worddoc = word.Documents.Open(doc_path,ReadOnly = 1)
+            worddoc.SaveAs(pdf_path, FileFormat = 17)
+            worddoc.Close()
+        return pdf_name
+    except:
+        print('执行失败：'+doc_name)
+        return 1
+    
+def xlsx2pdf(xlsx_name,pdf_name):
+    input_path = os.path.join(start_path,xlsx_name)
+    output_path = os.path.join(end_path,pdf_name)
+    try:
+        if not os.path.exists(output_path):
+            xlApp = client.Dispatch("Excel.Application")
+            books = xlApp.Workbooks.Open(input_path)
+            ws = books.Worksheets[0]
+            ws.Visible = 1
+            ws.ExportAsFixedFormat(0,output_path)
+    except:
+        print('执行失败：'+xlsx_name)
+        return 1   
+
+
+start_path = r'D:\zdm' #读取office文件路径
+end_path = r'D:\pdf' #转成pdf输出文件夹路径
+                            
+#需要合并的文件所在路径
+files = []
+filenames = os.listdir(start_path)
+
+for filename in filenames:
+    file = os.path.join(start_path,filename)
+    file_name,file_type = os.path.splitext(filename)
+    if(file_type in ['.doc','.docx']):
+        doc2pdf(filename,file_name+'.pdf')
+    elif(file_type in ['.xls','.xlsx']):
+        xlsx2pdf(filename,file_name+'.pdf')
+    else:
+        print('其它格式文件：'+filename)
+    files.append(file)
+else:
+    print("执行完成")
