@@ -10,7 +10,7 @@ def doc2pdf(doc_name, pdf_name):
     :param pdf_name 转换后pdf文件名称
     """
     doc_path = os.path.join(start_path,doc_name)
-    pdf_path = os.path.join(end_path',pdf_name)
+    pdf_path = os.path.join(end_path,pdf_name)
     try:
         word = client.DispatchEx("Word.Application")
         if not os.path.exists(pdf_path):
